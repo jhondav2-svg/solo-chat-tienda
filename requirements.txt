@@ -1,0 +1,4 @@
+flet
+python-socketio[client]
+
+

@@ -1,4 +1,6 @@
 flet
 python-socketio[client]
-
-
+flask
+flask-socketio
+gunicorn
+simple-websocket

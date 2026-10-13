@@ -1,314 +1,903 @@
-
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
 
-    <title>Chat Online - Tienda Pepe</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <title>Chat Online - Tienda Pepe | MY TIEND</title>
+
+    <meta
+        name="description"
+        content="Chat online de Tienda Pepe para realizar consultas de productos, disponibilidad y atención al cliente."
+    >
+
+    <meta
+        name="robots"
+        content="index, follow"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0e0f11"
+    >
+
+    <script
+        src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        defer
+    ></script>
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
+
+        html,
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f1f3f6;
+            padding: 0;
+            min-height: 100%;
         }
+
+
+        body {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f1f3f6;
+
+            color: #222222;
+        }
+
+
+        /* =========================================
+           TEXTO SOLO PARA LECTORES DE PANTALLA
+        ========================================= */
+
+        .sr-only {
+
+            position: absolute;
+
+            width: 1px;
+            height: 1px;
+
+            padding: 0;
+            margin: -1px;
+
+            overflow: hidden;
+
+            clip: rect(
+                0,
+                0,
+                0,
+                0
+            );
+
+            white-space: nowrap;
+
+            border: 0;
+        }
+
+
+        /* =========================================
+           CONTENEDOR
+        ========================================= */
 
         .contenedor {
+
             width: 100%;
+
             max-width: 480px;
+
             height: 100dvh;
+
             margin: auto;
+
             display: flex;
+
             flex-direction: column;
+
             background: white;
-            box-shadow: 0 0 20px #00000015;
+
+            box-shadow:
+                0 0 20px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.08
+                );
         }
 
+
+        /* =========================================
+           CABECERA
+        ========================================= */
+
         .cabecera {
+
             background: #0e0f11;
+
             color: white;
+
             padding: 18px;
         }
 
+
         .titulo {
+
+            margin: 0;
+
             font-size: 20px;
+
             font-weight: bold;
         }
 
+
         .estado {
+
             font-size: 12px;
+
             margin-top: 8px;
+
             color: #ffb0b0;
         }
 
+
         .estado.conectado {
+
             color: #46c76b;
         }
 
+
+        /* =========================================
+           CONFIGURACIÓN
+        ========================================= */
+
         .configuracion {
+
             padding: 12px;
-            background: #fff;
-            border-bottom: 1px solid #eee;
+
+            background: #ffffff;
+
+            border-bottom:
+                1px solid #eeeeee;
+
             display: flex;
+
             gap: 8px;
         }
 
-        select, input {
+
+        select,
+        input {
+
             min-width: 0;
+
             padding: 12px;
-            border: 1px solid #ddd;
+
+            border:
+                1px solid #767676;
+
             border-radius: 8px;
-            font-size: 14px;
+
+            font-size: 16px;
+
+            background: white;
+
+            color: #222222;
         }
 
+
+        select:focus,
+        input:focus,
+        button:focus {
+
+            outline:
+                3px solid
+                rgba(
+                    227,
+                    27,
+                    35,
+                    0.30
+                );
+
+            outline-offset: 2px;
+        }
+
+
         select {
+
             width: 125px;
         }
 
+
         .configuracion input {
+
             flex: 1;
         }
 
+
+        /* =========================================
+           MENSAJES
+        ========================================= */
+
         .mensajes {
+
             flex: 1;
+
             overflow-y: auto;
+
             padding: 15px;
+
             background: #f1f3f6;
+
             display: flex;
+
             flex-direction: column;
+
             gap: 10px;
         }
 
+
         .mensaje {
+
             max-width: 82%;
+
             padding: 12px;
+
             border-radius: 14px;
+
             overflow-wrap: anywhere;
-            box-shadow: 0 2px 5px #00000008;
+
+            box-shadow:
+                0 2px 5px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.04
+                );
         }
 
+
         .propio {
+
             align-self: flex-end;
-            background: #e31b23;
+
+            background: #c9141c;
+
             color: white;
+
             border-bottom-right-radius: 4px;
         }
 
+
         .otro {
+
             align-self: flex-start;
+
             background: white;
-            color: #222;
+
+            color: #222222;
+
             border-bottom-left-radius: 4px;
         }
 
+
         .autor {
+
             font-size: 11px;
+
             font-weight: bold;
+
             margin-bottom: 5px;
         }
 
+
         .texto {
+
             font-size: 14px;
+
             line-height: 1.5;
+
             white-space: pre-wrap;
         }
 
+
+        /* =========================================
+           BARRA DE MENSAJES
+        ========================================= */
+
         .barra {
+
             padding: 12px;
+
             display: flex;
+
             gap: 10px;
+
             background: white;
-            border-top: 1px solid #eee;
+
+            border-top:
+                1px solid #eeeeee;
         }
 
+
         .barra input {
+
             flex: 1;
         }
 
+
         button {
-            background: #e31b23;
+
+            min-width: 75px;
+
+            min-height: 44px;
+
+            background: #c9141c;
+
             color: white;
+
             border: none;
+
             border-radius: 8px;
-            padding: 12px 18px;
+
+            padding:
+                12px 18px;
+
+            font-size: 14px;
+
             font-weight: bold;
+
             cursor: pointer;
         }
 
+
+        button:hover {
+
+            background: #a91017;
+        }
+
+
         button:disabled {
-            opacity: 0.5;
+
+            opacity: 0.6;
+
             cursor: not-allowed;
         }
 
-        @media (min-width: 600px) {
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (
+            min-width: 600px
+        ) {
+
             body {
+
                 padding: 20px;
             }
 
+
             .contenedor {
-                height: calc(100dvh - 40px);
+
+                height:
+                    calc(
+                        100dvh - 40px
+                    );
+
                 border-radius: 14px;
+
                 overflow: hidden;
             }
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-<div class="contenedor">
 
-    <div class="cabecera">
-        <div class="titulo">TIENDA PEPE</div>
-        <div id="estado" class="estado">
+<!-- =========================================
+     CONTENIDO PRINCIPAL
+========================================= -->
+
+<main
+    class="contenedor"
+    aria-label="Chat online de Tienda Pepe"
+>
+
+
+    <!-- =====================================
+         CABECERA
+    ====================================== -->
+
+    <header class="cabecera">
+
+        <h1 class="titulo">
+            TIENDA PEPE
+        </h1>
+
+        <div
+            id="estado"
+            class="estado"
+            role="status"
+            aria-live="polite"
+        >
             Conectando...
         </div>
-    </div>
 
-    <div class="configuracion">
-        <select id="tipoUsuario">
-            <option value="Cliente">Cliente</option>
-            <option value="Tienda">Tienda</option>
+    </header>
+
+
+    <!-- =====================================
+         CONFIGURACIÓN
+    ====================================== -->
+
+    <section
+        class="configuracion"
+        aria-label="Datos del usuario"
+    >
+
+
+        <label
+            for="tipoUsuario"
+            class="sr-only"
+        >
+            Tipo de usuario
+        </label>
+
+
+        <select
+            id="tipoUsuario"
+            name="tipoUsuario"
+            aria-label="Tipo de usuario"
+        >
+
+            <option value="Cliente">
+                Cliente
+            </option>
+
+            <option value="Tienda">
+                Tienda
+            </option>
+
         </select>
+
+
+        <label
+            for="nombre"
+            class="sr-only"
+        >
+            Nombre del usuario
+        </label>
+
 
         <input
             id="nombre"
+            name="nombre"
             type="text"
             placeholder="Tu nombre"
             maxlength="30"
+            autocomplete="name"
+            aria-label="Nombre del usuario"
         >
-    </div>
 
-    <div id="mensajes" class="mensajes">
-    </div>
+    </section>
 
-    <form id="formulario" class="barra">
+
+    <!-- =====================================
+         MENSAJES
+    ====================================== -->
+
+    <section
+        id="mensajes"
+        class="mensajes"
+        aria-label="Conversación"
+        aria-live="polite"
+        aria-relevant="additions"
+    >
+    </section>
+
+
+    <!-- =====================================
+         FORMULARIO
+    ====================================== -->
+
+    <form
+        id="formulario"
+        class="barra"
+        aria-label="Enviar mensaje"
+    >
+
+
+        <label
+            for="mensaje"
+            class="sr-only"
+        >
+            Escribe tu mensaje
+        </label>
+
 
         <input
             id="mensaje"
+            name="mensaje"
             type="text"
             placeholder="Escribe tu mensaje..."
             maxlength="2000"
             autocomplete="off"
+            aria-label="Escribe tu mensaje"
             required
         >
 
-        <button id="enviar" type="submit">
+
+        <button
+            id="enviar"
+            type="submit"
+            aria-label="Enviar mensaje"
+        >
             Enviar
         </button>
 
+
     </form>
 
-</div>
+
+</main>
+
 
 <script>
-    const socket = io();
 
-    const mensajes = document.getElementById("mensajes");
-    const formulario = document.getElementById("formulario");
-    const campo = document.getElementById("mensaje");
-    const estado = document.getElementById("estado");
-    const boton = document.getElementById("enviar");
-    const nombre = document.getElementById("nombre");
-    const tipoUsuario = document.getElementById("tipoUsuario");
+    /*
+    ========================================================
+    ESPERAR A QUE LA PÁGINA ESTÉ LISTA
+    ========================================================
+    */
 
-    const identificador = Math.random()
-        .toString(36)
-        .slice(2);
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
-    let pendientes = [];
 
-    socket.on("connect", function () {
-        estado.textContent = "● Conectado";
-        estado.classList.add("conectado");
-        boton.disabled = false;
-    });
+            /*
+            =================================================
+            SOCKET.IO
+            =================================================
+            */
 
-    socket.on("disconnect", function () {
-        estado.textContent = "● Desconectado";
-        estado.classList.remove("conectado");
-        boton.disabled = true;
-    });
+            const socket = io();
 
-    function mostrarMensaje(datos, esPropio) {
-        const burbuja = document.createElement("div");
 
-        burbuja.className = esPropio
-            ? "mensaje propio"
-            : "mensaje otro";
+            /*
+            =================================================
+            ELEMENTOS
+            =================================================
+            */
 
-        const autor = document.createElement("div");
-        autor.className = "autor";
-        autor.textContent = datos.usuario;
+            const mensajes =
+                document.getElementById(
+                    "mensajes"
+                );
 
-        const texto = document.createElement("div");
-        texto.className = "texto";
-        texto.textContent = datos.texto;
 
-        burbuja.appendChild(autor);
-        burbuja.appendChild(texto);
+            const formulario =
+                document.getElementById(
+                    "formulario"
+                );
 
-        mensajes.appendChild(burbuja);
 
-        mensajes.scrollTop = mensajes.scrollHeight;
-    }
+            const campo =
+                document.getElementById(
+                    "mensaje"
+                );
 
-    formulario.addEventListener("submit", function (evento) {
-        evento.preventDefault();
 
-        if (!socket.connected) {
-            alert("No hay conexión con el servidor");
-            return;
+            const estado =
+                document.getElementById(
+                    "estado"
+                );
+
+
+            const boton =
+                document.getElementById(
+                    "enviar"
+                );
+
+
+            const nombre =
+                document.getElementById(
+                    "nombre"
+                );
+
+
+            const tipoUsuario =
+                document.getElementById(
+                    "tipoUsuario"
+                );
+
+
+            /*
+            =================================================
+            IDENTIFICADOR
+            =================================================
+            */
+
+            const identificador =
+                Math.random()
+                    .toString(36)
+                    .slice(2);
+
+
+            let pendientes = [];
+
+
+            /*
+            =================================================
+            CONEXIÓN
+            =================================================
+            */
+
+            socket.on(
+                "connect",
+                function () {
+
+                    estado.textContent =
+                        "● Conectado";
+
+
+                    estado.classList.add(
+                        "conectado"
+                    );
+
+
+                    boton.disabled = false;
+                }
+            );
+
+
+            /*
+            =================================================
+            DESCONEXIÓN
+            =================================================
+            */
+
+            socket.on(
+                "disconnect",
+                function () {
+
+                    estado.textContent =
+                        "● Desconectado";
+
+
+                    estado.classList.remove(
+                        "conectado"
+                    );
+
+
+                    boton.disabled = true;
+                }
+            );
+
+
+            /*
+            =================================================
+            MOSTRAR MENSAJE
+            =================================================
+            */
+
+            function mostrarMensaje(
+                datos,
+                esPropio
+            ) {
+
+                const burbuja =
+                    document.createElement(
+                        "article"
+                    );
+
+
+                burbuja.className =
+                    esPropio
+                        ? "mensaje propio"
+                        : "mensaje otro";
+
+
+                const autor =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                autor.className =
+                    "autor";
+
+
+                autor.textContent =
+                    datos.usuario;
+
+
+                const texto =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                texto.className =
+                    "texto";
+
+
+                texto.textContent =
+                    datos.texto;
+
+
+                burbuja.appendChild(
+                    autor
+                );
+
+
+                burbuja.appendChild(
+                    texto
+                );
+
+
+                mensajes.appendChild(
+                    burbuja
+                );
+
+
+                mensajes.scrollTop =
+                    mensajes.scrollHeight;
+            }
+
+
+            /*
+            =================================================
+            ENVIAR MENSAJE
+            =================================================
+            */
+
+            formulario.addEventListener(
+                "submit",
+                function (evento) {
+
+                    evento.preventDefault();
+
+
+                    if (!socket.connected) {
+
+                        alert(
+                            "No hay conexión con el servidor"
+                        );
+
+                        return;
+                    }
+
+
+                    const texto =
+                        campo.value.trim();
+
+
+                    if (!texto) {
+
+                        return;
+                    }
+
+
+                    const rol =
+                        tipoUsuario.value;
+
+
+                    const usuario =
+                        rol === "Tienda"
+
+                            ? "TIENDA PEPE"
+
+                            : (
+                                nombre.value.trim()
+                                ||
+                                "Cliente"
+                            );
+
+
+                    pendientes.push(
+                        {
+                            usuario: usuario,
+                            texto: texto
+                        }
+                    );
+
+
+                    socket.emit(
+                        "mensaje",
+                        {
+                            usuario: usuario,
+                            texto: texto
+                        }
+                    );
+
+
+                    campo.value = "";
+
+
+                    campo.focus();
+                }
+            );
+
+
+            /*
+            =================================================
+            RECIBIR MENSAJE
+            =================================================
+            */
+
+            socket.on(
+                "mensaje",
+                function (datos) {
+
+                    let esPropio =
+                        false;
+
+
+                    const indice =
+                        pendientes.findIndex(
+                            function (item) {
+
+                                return (
+                                    item.usuario
+                                    ===
+                                    datos.usuario
+
+                                    &&
+
+                                    item.texto
+                                    ===
+                                    datos.texto
+                                );
+                            }
+                        );
+
+
+                    if (indice !== -1) {
+
+                        esPropio =
+                            true;
+
+
+                        pendientes.splice(
+                            indice,
+                            1
+                        );
+                    }
+
+
+                    mostrarMensaje(
+                        datos,
+                        esPropio
+                    );
+                }
+            );
+
         }
+    );
 
-        const texto = campo.value.trim();
-
-        if (!texto) return;
-
-        const rol = tipoUsuario.value;
-
-        const usuario = rol === "Tienda"
-            ? "TIENDA PEPE"
-            : (nombre.value.trim() || "Cliente");
-
-        pendientes.push({
-            usuario: usuario,
-            texto: texto
-        });
-
-        socket.emit("mensaje", {
-            usuario: usuario,
-            texto: texto
-        });
-
-        campo.value = "";
-        campo.focus();
-    });
-
-    socket.on("mensaje", function (datos) {
-        let esPropio = false;
-
-        const indice = pendientes.findIndex(function (item) {
-            return item.usuario === datos.usuario &&
-                   item.texto === datos.texto;
-        });
-
-        if (indice !== -1) {
-            esPropio = true;
-            pendientes.splice(indice, 1);
-        }
-
-        mostrarMensaje(datos, esPropio);
-    });
 </script>
 
+
 </body>
+
 </html>
